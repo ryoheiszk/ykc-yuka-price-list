@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>料金表 - ユカチャン社労士相談室</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container" id="app"></div>
+
+  <script>
+    async function loadData() {
+      const response = await fetch('content.json');
+      return await response.json();
+    }
+
+    function renderItem(item) {
+      const hasPrice = item.price !== undefined;
+      const headerHtml = `
+        <div class="item-header">
+          <span class="item-name">${item.name}</span>
+          ${hasPrice ? `<span class="item-price">${item.price}</span>` : ''}
+        </div>
+      `;
+
+      const noteHtml = item.note ? `<div class="item-note">${item.note}</div>` : '';
+
+      const detailsHtml = item.details ? `
+        <div class="item-details">
+          ${item.details.map(d => `<div>${d}</div>`).join('')}
+        </div>
+      ` : '';
+
+      return `
+        <div class="item">
+          ${headerHtml}
+          ${noteHtml}
+          ${detailsHtml}
+        </div>
+      `;
+    }
+
+    function renderSection(section) {
+      return `
+        <div class="section">
+          <div class="section-title">${section.title}</div>
+          ${section.items.map(item => renderItem(item)).join('')}
+        </div>
+      `;
+    }
+
+    function renderNotes(notes) {
+      return `
+        <div class="notes">
+          <div class="notes-title">その他</div>
+          <ul>
+            ${notes.map(note => `<li>${note}</li>`).join('')}
+          </ul>
+        </div>
+      `;
+    }
+
+    async function render() {
+      const data = await loadData();
+      const app = document.getElementById('app');
+
+      const html = `
+        <header>
+          <h1>${data.title}</h1>
+          <div class="subtitle">${data.subtitle}</div>
+        </header>
+        ${data.sections.map(section => renderSection(section)).join('')}
+        ${renderNotes(data.notes)}
+      `;
+
+      app.innerHTML = html;
+    }
+
+    render();
+  </script>
+</body>
+</html>
